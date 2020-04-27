@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <!--侧边部门数据-->
+      <!--侧边部门数据
       <el-col :xs="9" :sm="6" :md="4" :lg="4" :xl="4">
         <div class="head-container">
           <el-input
@@ -21,7 +21,7 @@
           default-expand-all
           @node-click="handleNodeClick"
         />
-      </el-col>
+      </el-col>-->
       <!--用户数据-->
       <el-col :xs="15" :sm="18" :md="20" :lg="20" :xl="20">
         <!--工具栏-->
@@ -83,6 +83,7 @@
             <el-form-item label="邮箱" prop="email">
               <el-input v-model="form.email" />
             </el-form-item>
+            <!--
             <el-form-item label="部门" prop="dept.id">
               <treeselect
                 v-model="form.dept.id"
@@ -101,7 +102,7 @@
                   :value="item.id"
                 />
               </el-select>
-            </el-form-item>
+            </el-form-item>-->
             <el-form-item label="性别">
               <el-radio-group v-model="form.sex" style="width: 178px">
                 <el-radio label="男">男</el-radio>
@@ -149,6 +150,7 @@
           <el-table-column prop="sex" label="性别" />
           <el-table-column :show-overflow-tooltip="true" prop="phone" width="100" label="电话" />
           <el-table-column :show-overflow-tooltip="true" width="125" prop="email" label="邮箱" />
+          <!--
           <el-table-column :show-overflow-tooltip="true" width="110" prop="dept" label="部门 / 岗位">
             <template slot-scope="scope">
               <div>{{ scope.row.dept.name }} / {{ scope.row.job.name }}</div>
@@ -164,7 +166,7 @@
                 @change="changeEnabled(scope.row, scope.row.enabled)"
               />
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column :show-overflow-tooltip="true" prop="createTime" width="140" label="创建日期">
             <template slot-scope="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
@@ -196,23 +198,19 @@
 <script>
 import crudUser from '@/api/system/user'
 import { isvalidPhone } from '@/utils/validate'
-import { getDepts } from '@/api/system/dept'
 import { getAll, getLevel } from '@/api/system/role'
-import { getAllJob } from '@/api/system/job'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
 import udOperation from '@crud/UD.operation'
 import pagination from '@crud/Pagination'
-import Treeselect from '@riophae/vue-treeselect'
 import { mapGetters } from 'vuex'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
 let userRoles = []
 const defaultForm = { id: null, username: null, nickName: null, sex: '男', email: null, enabled: 'false', roles: [], job: { id: null }, dept: { id: null }, phone: null }
 export default {
   name: 'User',
-  components: { Treeselect, crudOperation, rrOperation, udOperation, pagination },
+  components: { crudOperation, rrOperation, udOperation, pagination },
   cruds() {
     return CRUD({ title: '用户', url: 'api/users', crudMethod: { ...crudUser }})
   },
@@ -269,7 +267,7 @@ export default {
   },
   created() {
     this.$nextTick(() => {
-      this.getDeptDatas()
+      // this.getDeptDatas()
       this.crud.toQuery()
       this.crud.msg.add = '新增成功，默认密码：123456'
     })
@@ -311,14 +309,14 @@ export default {
     },
     // 新增与编辑前做的操作
     [CRUD.HOOK.afterToCU](crud, form) {
-      this.getDepts()
+      // this.getDepts()
       this.getRoles()
       this.getRoleLevel()
       form.enabled = form.enabled.toString()
     },
     // 打开编辑弹窗前做的操作
     [CRUD.HOOK.beforeToEdit](crud, form) {
-      this.getJobs(this.form.dept.id)
+      // this.getJobs(this.form.dept.id)
       userRoles = []
       const roles = []
       form.roles.forEach(function(role, index) {
@@ -331,19 +329,7 @@ export default {
     },
     // 提交前做的操作
     [CRUD.HOOK.afterValidateCU](crud) {
-      if (!crud.form.dept.id) {
-        this.$message({
-          message: '部门不能为空',
-          type: 'warning'
-        })
-        return false
-      } else if (!crud.form.job.id) {
-        this.$message({
-          message: '岗位不能为空',
-          type: 'warning'
-        })
-        return false
-      } else if (this.roles.length === 0) {
+      if (this.roles.length === 0) {
         this.$message({
           message: '角色不能为空',
           type: 'warning'
@@ -354,6 +340,7 @@ export default {
       return true
     },
     // 获取左侧部门数据
+    /**
     getDeptDatas() {
       const sort = 'id,desc'
       const params = { sort: sort }
@@ -377,6 +364,7 @@ export default {
       }
       this.crud.toQuery()
     },
+     */
     // 改变状态
     changeEnabled(data, val) {
       this.$confirm('此操作将 "' + this.dict.label.user_status[val] + '" ' + data.username + ', 是否继续？', '提示', {
@@ -400,6 +388,7 @@ export default {
       }).catch(() => { })
     },
     // 获取弹窗内岗位数据
+    /**
     getJobs(id) {
       getAllJob(id).then(res => {
         this.jobs = res.content
@@ -410,6 +399,7 @@ export default {
       this.getJobs(node.id)
       this.form.job.id = null
     },
+     */
     // 获取权限级别
     getRoleLevel() {
       getLevel().then(res => {
