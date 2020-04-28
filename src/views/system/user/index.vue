@@ -109,13 +109,18 @@
                 <el-radio label="女">女</el-radio>
               </el-radio-group>
             </el-form-item>
+
             <el-form-item label="状态">
               <el-radio-group v-model="form.enabled" :disabled="form.id === user.id">
+                <el-radio label="true">激活</el-radio>
+                <el-radio label="false">未激活</el-radio>
+                <!--
                 <el-radio
                   v-for="item in dict.user_status"
                   :key="item.id"
                   :label="item.value"
                 >{{ item.label }}</el-radio>
+                -->
               </el-radio-group>
             </el-form-item>
             <el-form-item style="margin-bottom: 0;" label="角色" prop="roles">
@@ -156,6 +161,7 @@
               <div>{{ scope.row.dept.name }} / {{ scope.row.job.name }}</div>
             </template>
           </el-table-column>
+          -->
           <el-table-column label="状态" align="center" prop="enabled">
             <template slot-scope="scope">
               <el-switch
@@ -166,7 +172,12 @@
                 @change="changeEnabled(scope.row, scope.row.enabled)"
               />
             </template>
-          </el-table-column> -->
+          </el-table-column>
+          <el-table-column label="角色">
+            <template slot-scope="scope">
+              <div v-html="formatRoles(scope.row.roles)" />
+            </template>
+          </el-table-column>
           <el-table-column :show-overflow-tooltip="true" prop="createTime" width="140" label="创建日期">
             <template slot-scope="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
@@ -207,7 +218,7 @@ import pagination from '@crud/Pagination'
 import { mapGetters } from 'vuex'
 
 let userRoles = []
-const defaultForm = { id: null, username: null, nickName: null, sex: '男', email: null, enabled: 'false', roles: [], job: { id: null }, dept: { id: null }, phone: null }
+const defaultForm = { id: null, username: null, nickName: null, sex: '男', email: null, enabled: 'false', roles: [], phone: null }
 export default {
   name: 'User',
   components: { crudOperation, rrOperation, udOperation, pagination },
@@ -216,7 +227,7 @@ export default {
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   // 数据字典
-  dicts: ['user_status'],
+  // dicts: ['user_status'],
   data() {
     // 自定义验证
     const validPhone = (rule, value, callback) => {
@@ -230,7 +241,7 @@ export default {
     }
     return {
       height: document.documentElement.clientHeight - 180 + 'px;',
-      deptName: '', depts: [], deptDatas: [], jobs: [], level: 3, roles: [],
+      level: 3, roles: [],
       defaultProps: { children: 'children', label: 'name' },
       permission: {
         add: ['admin', 'user:add'],
@@ -367,13 +378,13 @@ export default {
      */
     // 改变状态
     changeEnabled(data, val) {
-      this.$confirm('此操作将 "' + this.dict.label.user_status[val] + '" ' + data.username + ', 是否继续？', '提示', {
+      this.$confirm('此操作将 "' + ((data.enabled) ? '激活' : '禁用') + '" ' + data.username + ', 是否继续？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         crudUser.edit(data).then(res => {
-          this.crud.notify(this.dict.label.user_status[val] + '成功', CRUD.NOTIFICATION_TYPE.SUCCESS)
+          this.crud.notify(((data.enabled) ? '激活' : '禁用') + '成功', CRUD.NOTIFICATION_TYPE.SUCCESS)
         }).catch(() => {
           data.enabled = !data.enabled
         })
@@ -386,6 +397,16 @@ export default {
       getAll().then(res => {
         this.roles = res
       }).catch(() => { })
+    },
+    // 获取全部角色
+    formatRoles(roles) {
+      // console.log(roles)
+      const values = []
+      for (const role of roles) {
+        // console.log(role.name)
+        values.push(role.name)
+      }
+      return values.join(',')
     },
     // 获取弹窗内岗位数据
     /**
